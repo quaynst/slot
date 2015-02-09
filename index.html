@@ -2,24 +2,120 @@
 <html lang="ja">
 <head>
 	<meta charset="UTF-8">
-	<title> Slot </title>
+	<title> スロット </title>
 	<style type="text/css">
 		.slot{
 			float: left;
 			width: 150px;
 			text-align: center;
-			font-size: 20px;
+			font-size: 40px;
 		}
 	</style>
 </head>
-<body>
-	<div class="slot">
-		<div>0</div>
-		<input type="button" value="STOP">
-	</div>
-	<div class="slot">
-		<div>0</div>
-		<input type="button" value="STOP">
-	</div>
-</body>
+    <body>
+    	<h1>間違えたら即終了！  無限スロット </h1>
+    	<p>現在の得点：<span id="score">0</span></p>
+        <div class="slot">
+            <div id="slot0">0</div>
+            <input type="button" value="STOP" id="stop0">
+        </div>
+        <div class="slot">
+            <div id="slot1">0</div>
+            <input type="button" value="STOP" id="stop1">
+        </div>
+
+        <script>
+        (function (){
+        	var timers = [];
+        	var results = [];
+        	var stopCount = 0;
+        	var score = 0;
+        	var interval = 400;
+
+        	// イベントの登録
+        	document.getElementById('stop0').onclick = function(){
+        		stopSlot(0);
+        	};
+        	document.getElementById('stop1').onclick = function(){
+        		stopSlot(1);
+        	};
+
+        	// スロットを回す処理 -> タイマーを有効にする
+        	// スロット開始
+        	startSlot();
+
+        	function startSlot(){
+	        timers = [];
+	        results = [];
+	        stopCount = 0;
+	        	// タイマーを使ってスロットを具体的に動かす処理
+        		runSlot(0);
+        		runSlot(1);
+        	}
+
+        	// タイマーを使ってスロットを具体的に動かす処理
+        	// 各スロットの値を0~9で変化させる
+        	function runSlot(num){
+        		var slotValue = document.getElementById('slot' + num);
+
+        		if(slotValue.textContent < 9){
+        			slotValue.textContent ++;
+        		}else{
+        			slotValue.textContent = 0;
+        		}
+
+        		timers[num] = setTimeout(function() {
+        			runSlot(num);
+        		}, interval);
+
+        	}
+
+        	function stopSlot(num) {
+        		// タイマーを止める
+        		clearTimeout(timers[num]);
+        		results[num] = document.getElementById('slot' + num).textContent;
+
+        		stopCount++;
+        		if (stopCount == 2) {
+        			checkResult();
+        		}
+        	}
+
+        	function checkResult() {
+        		// 判定処理
+        		if(results[0] == results[1]){
+        			alert('揃ったぜ');
+        			score += 100;
+        			interval *= 0.8;
+        			updateDcore();
+        			startSlot();
+        		}else{
+        			gameover();
+        			// alert('はずれた');
+        		}
+        	}
+
+        	function updateDcore(){
+        		var target = document.getElementById('score');
+        		target.textContent = score;
+        	}
+
+        	function gameover(){
+        		alert('Game Over...');
+        		// TODO tweetボタンを表示
+        		getTweetBtn();
+        	}
+
+        	function getTweetBtn(){
+        		var tweetBtn = document.createElement('p');
+        		tweetBtn.innerHTML = '<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://schoo.jp" data-text="スロットの結果！' +score+ '" data-hashtags="schoo_slot">Tweet</a>';
+        		var h1 = document.getElementsByTagName('h1')[0];
+        		document.body.insertBefore(tweetBtn, h1);
+
+			!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');
+        	}
+})();
+
+        </script>
+    </body>
 </html>
